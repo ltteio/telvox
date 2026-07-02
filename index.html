@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0" />
+    <title>Telvox</title>
+    
+    <!-- PWA Meta Tags & Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#020617" />
+    <meta name="description" content="The Football Progress Operating System - Accompagnement de haut niveau 24h/24 par IA pour maximiser la progression sur le terrain." />
+    
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Telvox" />
+    <link rel="apple-touch-icon" href="/icon.png" />
+    
+    <!-- Splash Screen Meta Tags / Icons -->
+    <link rel="icon" type="image/png" href="/icon.png" />
+    
+    <script>
+      // Safe patch for environments (like sandboxed iframes or certain browser extensions)
+      // where window.fetch only exposes a getter, causing crashes when third-party scripts
+      // attempt to wrap or modify window.fetch.
+      try {
+        // 1. Prevent formdata-polyfill from executing by ensuring FormData and FormData.prototype.keys exist
+        if (typeof window !== 'undefined') {
+          if (typeof window.FormData === 'undefined') {
+            window.FormData = class FormData {
+              constructor() { this._data = {}; }
+              append(k, v) { this._data[k] = v; }
+              delete(k) { delete this._data[k]; }
+              get(k) { return this._data[k]; }
+              has(k) { return k in this._data; }
+              set(k, v) { this._data[k] = v; }
+            };
+          }
+          if (window.FormData.prototype && !window.FormData.prototype.keys) {
+            window.FormData.prototype.keys = function* () {
+              yield* [];
+            };
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to patch FormData:", e);
+      }
+
+      try {
+        const originalFetch = window.fetch;
+        let customFetch = originalFetch;
+
+        const tryDefine = (obj) => {
+          try {
+            Object.defineProperty(obj, 'fetch', {
+              get() { return customFetch; },
+              set(val) { customFetch = val; },
+              configurable: true,
+              enumerable: true
+            });
+          } catch (e) {}
+        };
+
+        // Try to patch all potential global locations in case any are configurable
+        if (typeof Window !== 'undefined' && Window.prototype) {
+          tryDefine(Window.prototype);
+        }
+        tryDefine(window);
+        if (typeof globalThis !== 'undefined') {
+          tryDefine(globalThis);
+        }
+      } catch (err) {
+        console.warn("Failed to patch fetch:", err);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

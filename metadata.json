@@ -1,0 +1,6 @@
+{
+  "name": "Telvox",
+  "description": "The Football Progress Operating System - Accompagnement de haut niveau 24h/24 par IA pour maximiser la progression sur le terrain.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
